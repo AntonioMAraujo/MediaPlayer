@@ -1,20 +1,36 @@
 package mediaplayer.fa7.com.br.mediaplayer;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class MainActivity extends Activity {
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends Activity  implements ServiceConnection{
 
     private Intent serviceIntent;
     private Button buttonPlayStop;
     private boolean boolMusicPlaying = false;
-    private String strAudioLink = "http://www.villopim.com.br/android/Music_01.mp3";
+    private Button btnProximo;
+    private Button btnAnterior;
+    private int musicaTocando = 0;
+
+    private MyServicePlay.Controller controle;
+    private Funcionalidade funcionalidades;
+    private ServiceConnection connection;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,6 +39,7 @@ public class MainActivity extends Activity {
             serviceIntent = new Intent(this, MyServicePlay.class);
             initViews();
             setListeners();
+
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), e.getClass().getName() + " " +
@@ -35,12 +52,28 @@ public class MainActivity extends Activity {
         buttonPlayStop = (Button) findViewById(R.id.ButtonPlayStop);
         //buttonPlayStop.setBackgroundResources(R.drawable.playbuttonsm);
         buttonPlayStop.setBackgroundResource(R.drawable.playbuttonsm);
+        btnAnterior  = (Button) findViewById(R.id.btnAnterior);
+        btnProximo  = (Button) findViewById(R.id.btnProximo);
     }
 
     private void setListeners() {
         buttonPlayStop.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 buttonPlayStopClick();
+            }
+        });
+
+        btnAnterior.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                anterior();;
+            }
+        });
+
+        btnProximo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                proximo();
             }
         });
     }
@@ -60,9 +93,13 @@ public class MainActivity extends Activity {
     }
 
     private void playAudio() {
-        serviceIntent.putExtra("sentAudioLink", strAudioLink);
+        //serviceIntent.putExtra("musica",musicas.get(musicaTocando));
         try {
-            startService(serviceIntent);
+            if(connection == null) {
+                connection = this;
+                bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE); // Context.BIND_AUTO_CREATE
+                startService(serviceIntent);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), e.getClass().getName() + " " + e.getMessage(),
@@ -70,9 +107,32 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void proximo() {
+        try {
+            funcionalidades.proximo();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), e.getClass().getName() + " " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void anterior() {
+        try {
+            funcionalidades.anterior();
+            } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), e.getClass().getName() + " " + e.getMessage(),Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void stopMyPlayService() {
         try{
-            stopService(serviceIntent);
+            if(connection != null) {
+                unbindService(connection);
+                connection = null;
+                stopService(serviceIntent);
+            }
         }catch (Exception e){
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), e.getClass().getName() + " " + e.getMessage(),
@@ -81,4 +141,14 @@ public class MainActivity extends Activity {
         boolMusicPlaying = false;
     }
 
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        controle = (MyServicePlay.Controller) iBinder;
+        funcionalidades = controle.getMediaPlayer();
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+
+    }
 }
