@@ -20,7 +20,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends Activity  implements ServiceConnection{
+public class MainActivity extends Activity implements ServiceConnection {
 
     private Intent serviceIntent;
     private Button buttonPlayStop;
@@ -55,8 +55,8 @@ public class MainActivity extends Activity  implements ServiceConnection{
         buttonPlayStop = (Button) findViewById(R.id.ButtonPlayStop);
         //buttonPlayStop.setBackgroundResources(R.drawable.playbuttonsm);
         buttonPlayStop.setBackgroundResource(R.drawable.playbuttonsm);
-        btnAnterior  = (Button) findViewById(R.id.btnAnterior);
-        btnProximo  = (Button) findViewById(R.id.btnProximo);
+        btnAnterior = (Button) findViewById(R.id.btnAnterior);
+        btnProximo = (Button) findViewById(R.id.btnProximo);
     }
 
     private void setListeners() {
@@ -69,7 +69,8 @@ public class MainActivity extends Activity  implements ServiceConnection{
         btnAnterior.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                anterior();;
+                anterior();
+                ;
             }
         });
 
@@ -98,7 +99,7 @@ public class MainActivity extends Activity  implements ServiceConnection{
     private void playAudio() {
         //serviceIntent.putExtra("musica",musicas.get(musicaTocando));
         try {
-            if(connection == null) {
+            if (connection == null) {
                 connection = this;
                 bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE); // Context.BIND_AUTO_CREATE
                 startService(serviceIntent);
@@ -112,7 +113,11 @@ public class MainActivity extends Activity  implements ServiceConnection{
 
     private void proximo() {
         try {
-            funcionalidades.proximo();
+            if((funcionalidades.getIdentificadorMusica() < (funcionalidades.getSizeListMusic() - 1) )) {
+                funcionalidades.proximo();
+            }else{
+                Toast.makeText(this, "Musica Final do Player List", Toast.LENGTH_LONG).show();
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -122,21 +127,25 @@ public class MainActivity extends Activity  implements ServiceConnection{
 
     private void anterior() {
         try {
-            funcionalidades.anterior();
-            } catch (Exception e) {
+            if(funcionalidades.getIdentificadorMusica() > 0) {
+                funcionalidades.anterior();
+            }else{
+                Toast.makeText(this, "Musica Inicial do Player List", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(getApplicationContext(), e.getClass().getName() + " " + e.getMessage(),Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), e.getClass().getName() + " " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
     private void stopMyPlayService() {
-        try{
-            if(connection != null) {
+        try {
+            if (connection != null) {
                 unbindService(connection);
                 connection = null;
                 stopService(serviceIntent);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), e.getClass().getName() + " " + e.getMessage(),
                     Toast.LENGTH_SHORT).show();

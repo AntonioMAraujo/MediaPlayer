@@ -12,7 +12,6 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +25,6 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
 
     private MediaPlayer mediaPlayer = new MediaPlayer();
     private Controller controle = new Controller();
-    private List<Integer> musicas = new ArrayList<>();
     private List<Uri> listPlayer = new ArrayList<Uri>();
     private int musica = 0;
 
@@ -66,7 +64,8 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
     public void iniciarPlayer() {
         if (!mediaPlayer.isPlaying()) {
             try {
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), listPlayer.get(musica));
+                Uri uri = listPlayer.get(musica);
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), uri);
                 mediaPlayer.start();
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
@@ -149,6 +148,7 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
         if (!mediaPlayer.isPlaying()) {
             musica++;
             try {
+                mediaPlayer.reset();
                 mediaPlayer = MediaPlayer.create(getApplicationContext(), listPlayer.get(musica));
                 mediaPlayer.start();
             } catch (IllegalArgumentException e) {
@@ -208,7 +208,7 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
 
     @Override
     public int getSizeListMusic() {
-        return musicas.size();
+        return listPlayer.size();
     }
 
     @Override
