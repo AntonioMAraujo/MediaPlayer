@@ -5,8 +5,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,6 +32,7 @@ public class MainActivity extends Activity  implements ServiceConnection{
     private MyServicePlay.Controller controle;
     private Funcionalidade funcionalidades;
     private ServiceConnection connection;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,4 +154,6 @@ public class MainActivity extends Activity  implements ServiceConnection{
     public void onServiceDisconnected(ComponentName componentName) {
 
     }
+
+
 }

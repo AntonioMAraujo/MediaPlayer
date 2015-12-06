@@ -1,17 +1,17 @@
 package mediaplayer.fa7.com.br.mediaplayer;
 
 import android.app.Service;
+import android.content.ContentUris;
 import android.content.Intent;
+import android.database.Cursor;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Binder;
-import android.os.Environment;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,24 +27,20 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
     private MediaPlayer mediaPlayer = new MediaPlayer();
     private Controller controle = new Controller();
     private List<Integer> musicas = new ArrayList<>();
+    private List<Uri> listPlayer = new ArrayList<Uri>();
     private int musica = 0;
 
-
     public void onCreate() {
-        try {
-            Log.i("SCRIPT", "onCreate()");
-            musicas = listRaw();
-            musica = 0;
-            mediaPlayer.setOnCompletionListener(this);
-            mediaPlayer.setOnErrorListener(this);
-            mediaPlayer.setOnPreparedListener(this);
-            mediaPlayer.setOnBufferingUpdateListener(this);
-            mediaPlayer.setOnSeekCompleteListener(this);
-            mediaPlayer.setOnInfoListener(this);
-            mediaPlayer.reset();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        Log.i("SCRIPT", "onCreate()");
+        listPlayer = obterAudioCelular();
+        musica = 0;
+        mediaPlayer.setOnCompletionListener(this);
+        mediaPlayer.setOnErrorListener(this);
+        mediaPlayer.setOnPreparedListener(this);
+        mediaPlayer.setOnBufferingUpdateListener(this);
+        mediaPlayer.setOnSeekCompleteListener(this);
+        mediaPlayer.setOnInfoListener(this);
+        mediaPlayer.reset();
     }
 
     public class Controller extends Binder {
@@ -61,7 +57,7 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("SCRIPT","onStartCommand");
+        Log.i("SCRIPT", "onStartCommand");
         mediaPlayer.reset();
         iniciarPlayer();
         return (super.onStartCommand(intent, flags, startId));
@@ -70,7 +66,7 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
     public void iniciarPlayer() {
         if (!mediaPlayer.isPlaying()) {
             try {
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), musicas.get(musica));
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), listPlayer.get(musica));
                 mediaPlayer.start();
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
@@ -147,28 +143,13 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
         }
     }
 
-
-    public List<Integer> listRaw() throws IllegalAccessException {
-        Field[] fields = R.raw.class.getFields();
-        List<Integer> idsMusicas = new ArrayList<>();
-
-        for (int count = 0; count < fields.length; count++) {
-            idsMusicas.add(fields[count].getInt(fields[count]));
-        }
-
-        return idsMusicas;
-    }
-
     @Override
     public void proximo() {
-        //Log.i("APP", "proximo()");
         stopMedia();
         if (!mediaPlayer.isPlaying()) {
-            //Log.i("APP", "Valor Musica: "+ musica);
             musica++;
-            //Log.i("APP", "Valor Musica: "+ musica);
             try {
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), musicas.get(musica));
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), listPlayer.get(musica));
                 mediaPlayer.start();
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
@@ -185,7 +166,7 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
         if (!mediaPlayer.isPlaying()) {
             musica--;
             try {
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), musicas.get(musica));
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), listPlayer.get(musica));
                 mediaPlayer.start();
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
@@ -194,6 +175,31 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
             }
         }
     }
+
+
+    public List<Uri> obterAudioCelular() {
+        String[] projection = new String[]{MediaStore.Audio.Media._ID};
+
+        Uri contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        Cursor cursor = getContentResolver().query(contentUri, projection, null, null, null);
+
+        listPlayer = new ArrayList<>();
+
+        while (cursor.moveToNext()) {
+            String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
+            Long idMusica = Long.parseLong(id);
+            listPlayer.add(getURI(idMusica));
+        }
+        cursor.close();
+
+        return listPlayer;
+    }
+
+
+    public Uri getURI(Long id) {
+        return ContentUris.withAppendedId(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
+    }
+
 
     @Override
     public void pausar() {
