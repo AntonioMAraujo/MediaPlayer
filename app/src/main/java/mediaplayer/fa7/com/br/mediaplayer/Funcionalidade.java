@@ -10,4 +10,5 @@ public interface Funcionalidade {
     void pausar();
     int getSizeListMusic();
     int getIdentificadorMusica();
+    void playMedia();
 }

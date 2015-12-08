@@ -27,12 +27,10 @@ public class MainActivity extends Activity implements ServiceConnection {
     private boolean boolMusicPlaying = false;
     private Button btnProximo;
     private Button btnAnterior;
-    private int musicaTocando = 0;
-
+    private Button btnParar;
     private MyServicePlay.Controller controle;
     private Funcionalidade funcionalidades;
     private ServiceConnection connection;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,10 +51,11 @@ public class MainActivity extends Activity implements ServiceConnection {
 
     private void initViews() {
         buttonPlayStop = (Button) findViewById(R.id.ButtonPlayStop);
-        //buttonPlayStop.setBackgroundResources(R.drawable.playbuttonsm);
         buttonPlayStop.setBackgroundResource(R.drawable.playbuttonsm);
         btnAnterior = (Button) findViewById(R.id.btnAnterior);
         btnProximo = (Button) findViewById(R.id.btnProximo);
+        btnParar = (Button) findViewById(R.id.btnParar);
+
     }
 
     private void setListeners() {
@@ -80,6 +79,13 @@ public class MainActivity extends Activity implements ServiceConnection {
                 proximo();
             }
         });
+
+        btnParar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopMyPlayService();
+            }
+        });
     }
 
     private void buttonPlayStopClick() {
@@ -90,32 +96,33 @@ public class MainActivity extends Activity implements ServiceConnection {
         } else {
             if (boolMusicPlaying) {
                 buttonPlayStop.setBackgroundResource(R.drawable.pausebuttonsm);
-                stopMyPlayService();
+                funcionalidades.pausar();
                 boolMusicPlaying = false;
             }
         }
     }
 
     private void playAudio() {
-        //serviceIntent.putExtra("musica",musicas.get(musicaTocando));
         try {
             if (connection == null) {
                 connection = this;
-                bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE); // Context.BIND_AUTO_CREATE
+                bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
                 startService(serviceIntent);
+                return ;
             }
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), e.getClass().getName() + " " + e.getMessage(),
                     Toast.LENGTH_SHORT).show();
         }
+        funcionalidades.playMedia();
     }
 
     private void proximo() {
         try {
-            if((funcionalidades.getIdentificadorMusica() < (funcionalidades.getSizeListMusic() - 1) )) {
+            if ((funcionalidades.getIdentificadorMusica() < (funcionalidades.getSizeListMusic() - 1))) {
                 funcionalidades.proximo();
-            }else{
+            } else {
                 Toast.makeText(this, "Musica Final do Player List", Toast.LENGTH_LONG).show();
             }
 
@@ -127,9 +134,9 @@ public class MainActivity extends Activity implements ServiceConnection {
 
     private void anterior() {
         try {
-            if(funcionalidades.getIdentificadorMusica() > 0) {
+            if (funcionalidades.getIdentificadorMusica() > 0) {
                 funcionalidades.anterior();
-            }else{
+            } else {
                 Toast.makeText(this, "Musica Inicial do Player List", Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
@@ -137,6 +144,7 @@ public class MainActivity extends Activity implements ServiceConnection {
             Toast.makeText(getApplicationContext(), e.getClass().getName() + " " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void stopMyPlayService() {
         try {

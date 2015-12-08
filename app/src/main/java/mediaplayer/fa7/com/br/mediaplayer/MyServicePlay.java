@@ -27,9 +27,12 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
     private Controller controle = new Controller();
     private List<Uri> listPlayer = new ArrayList<Uri>();
     private int musica = 0;
+    private boolean serviceStarted = false;
+    private boolean servicePausado = false;
 
     public void onCreate() {
         Log.i("SCRIPT", "onCreate()");
+        serviceStarted = true;
         listPlayer = obterAudioCelular();
         musica = 0;
         mediaPlayer.setOnCompletionListener(this);
@@ -133,6 +136,7 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
     public void playMedia() {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
+            servicePausado = false;
         }
     }
 
@@ -203,7 +207,10 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
 
     @Override
     public void pausar() {
-
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+            servicePausado = true;
+        }
     }
 
     @Override
