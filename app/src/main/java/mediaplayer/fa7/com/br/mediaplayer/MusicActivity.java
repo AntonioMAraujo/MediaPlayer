@@ -5,22 +5,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.MediaStore;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
-public class MainActivity extends Activity implements ServiceConnection {
+public class MusicActivity extends Activity implements ServiceConnection {
 
     private Intent serviceIntent;
     private Button buttonPlayStop;
@@ -37,7 +28,7 @@ public class MainActivity extends Activity implements ServiceConnection {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_music);
         try {
             serviceIntent = new Intent(this, MyServicePlay.class);
             initViews();
