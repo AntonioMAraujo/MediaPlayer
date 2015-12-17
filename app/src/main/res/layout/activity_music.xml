@@ -31,4 +31,10 @@
         android:text="Proximo"
         android:id="@+id/btnProximo" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Parar"
+        android:id="@+id/btnParar" />
+
 </LinearLayout>
