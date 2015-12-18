@@ -195,7 +195,6 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
             listPlayer.add(getURI(idMusica));
         }
         cursor.close();
-
         return listPlayer;
     }
 
@@ -221,5 +220,10 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
     @Override
     public int getIdentificadorMusica() {
         return musica;
+    }
+
+    @Override
+    public List<Uri> getListMusic() {
+        return obterAudioCelular();
     }
 }

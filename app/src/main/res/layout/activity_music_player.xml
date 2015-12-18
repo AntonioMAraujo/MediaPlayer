@@ -22,6 +22,13 @@
 
     </android.support.design.widget.AppBarLayout>
 
+    <ListView
+        android:id="@+id/list_musics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </ListView>
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/btnPlayList"
         android:layout_width="wrap_content"
