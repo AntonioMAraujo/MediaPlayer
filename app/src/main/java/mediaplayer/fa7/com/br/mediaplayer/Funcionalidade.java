@@ -15,5 +15,5 @@ public interface Funcionalidade {
     int getSizeListMusic();
     int getIdentificadorMusica();
     void playMedia();
-    List<Media> getListMusic();
+    List<Uri> getListMusic();
 }
