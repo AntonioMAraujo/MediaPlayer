@@ -1,11 +1,13 @@
 package mediaplayer.fa7.com.br.mediaplayer.player;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
+import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,15 +15,19 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.List;
 
 import mediaplayer.fa7.com.br.mediaplayer.Funcionalidade;
 import mediaplayer.fa7.com.br.mediaplayer.Media;
 import mediaplayer.fa7.com.br.mediaplayer.MyServicePlay;
 import mediaplayer.fa7.com.br.mediaplayer.R;
 
-public class MediaListActivity extends Activity {
+public class MediaListActivity extends Activity implements ServiceConnection {
 
-    private MyServicePlay controle;
+    private Intent serviceIntent;
+    private MyServicePlay.Controller controller;
     private ServiceConnection connection;
 
     @Override
@@ -32,9 +38,14 @@ public class MediaListActivity extends Activity {
         ListView sampleList = (ListView) findViewById(R.id.sample_list);
         final MediaAdapter mediaAdapter = new MediaAdapter(this);
 
+        serviceIntent = new Intent(this, MyServicePlay.class);
+        prepareConnection();
         //carrego a lista de musicas do dispositivo
-        //List<Media> musicas =
+        List<Media> musicas = controller.getMediaPlayer().getListMusic();
 
+        for (int i=0;i<=musicas.size();i++) {
+            mediaAdapter.addAll(musicas.get(i));
+        }
 
         sampleList.setAdapter(mediaAdapter);
         sampleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -52,12 +63,36 @@ public class MediaListActivity extends Activity {
         Intent mpdIntent = new Intent(this, MusicPlayerActivity.class)
                 .setData(sample.uri)
                 .putExtra(MusicPlayerActivity.CONTENT_ID_EXTRA, sample.contentId)
-                .putExtra(MusicPlayerActivity.CONTENT_TYPE_EXTRA, sample.type)
                 .putExtra(MusicPlayerActivity.PROVIDER_EXTRA, sample.provider);
         startActivity(mpdIntent);
     }
 
-    private static class  MediaAdapter extends ArrayAdapter<Object> {
+    private void prepareConnection() {
+        try {
+            if (connection == null) {
+                connection = this;
+                bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
+                startService(serviceIntent);
+                return ;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), e.getClass().getName() + " " + e.getMessage(),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        controller = (MyServicePlay.Controller) iBinder;
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+
+    }
+
+    private static class  MediaAdapter extends ArrayAdapter<Media> {
 
         public MediaAdapter(Context context) {
             super(context, 0);
@@ -92,7 +127,6 @@ public class MediaListActivity extends Activity {
         public int getViewTypeCount() {
             return 2;
         }
-
     }
 
     private static class Header {
@@ -102,6 +136,5 @@ public class MediaListActivity extends Activity {
         public Header(String name) {
             this.name = name;
         }
-
     }
 }

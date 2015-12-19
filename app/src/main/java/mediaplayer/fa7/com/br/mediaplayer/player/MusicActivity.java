@@ -33,6 +33,7 @@ public class MusicActivity extends Activity implements ServiceConnection {
         setContentView(R.layout.activity_music);
         try {
             serviceIntent = new Intent(this, MyServicePlay.class);
+            startService(serviceIntent);
             initViews();
             setListeners();
 

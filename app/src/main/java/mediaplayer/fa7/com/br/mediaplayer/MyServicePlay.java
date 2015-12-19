@@ -21,7 +21,7 @@ import java.util.List;
 public class MyServicePlay extends Service implements MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnSeekCompleteListener, MediaPlayer.OnInfoListener,
-        MediaPlayer.OnBufferingUpdateListener, Funcionalidade {
+        MediaPlayer.OnBufferingUpdateListener,Funcionalidade{
 
     private MediaPlayer mediaPlayer = new MediaPlayer();
     private Controller controle = new Controller();
@@ -34,7 +34,7 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
     public void onCreate() {
         Log.i("SCRIPT", "onCreate()");
         serviceStarted = true;
-        listPlayer = obterAudioCelular();
+        listPlayer = getListMusic();
         musica = 0;
         mediaPlayer.setOnCompletionListener(this);
         mediaPlayer.setOnErrorListener(this);
@@ -182,10 +182,15 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
     }
 
 
-    public List<Media> obterAudioCelular() {
-        String[] projection = new String[]{MediaStore.Audio.Media._ID};
+    public List<Media> getListMusic() {
+        String[] projection = new String[]{
+                MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.DISPLAY_NAME,
+                MediaStore.Audio.Media.ARTIST,
+                MediaStore.Audio.Media.DATA};
 
         Uri contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+
         Cursor cursor = getContentResolver().query(contentUri, projection, null, null, null);
 
         listPlayer = new ArrayList<>();
@@ -196,10 +201,8 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
             //String provider = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.));
             Long idMusica = Long.parseLong(id);
             Uri uri = getURI(idMusica);
-            String typeS =cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.CONTENT_TYPE));
-            int type = Integer.parseInt(typeS);
 
-            listPlayer.add(new Media(name,uri,type));
+            listPlayer.add(new Media(idMusica,name,uri));
         }
         cursor.close();
 
