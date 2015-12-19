@@ -1,5 +1,9 @@
 package mediaplayer.fa7.com.br.mediaplayer;
 
+import android.net.Uri;
+
+import java.util.List;
+
 /**
  * Created by antonio on 05/12/2015.
  */
@@ -11,4 +15,5 @@ public interface Funcionalidade {
     int getSizeListMusic();
     int getIdentificadorMusica();
     void playMedia();
+    List<Uri> getListMusic();
 }
