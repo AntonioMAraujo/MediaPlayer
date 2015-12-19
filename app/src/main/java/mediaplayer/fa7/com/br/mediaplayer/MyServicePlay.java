@@ -25,10 +25,11 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
 
     private MediaPlayer mediaPlayer = new MediaPlayer();
     private Controller controle = new Controller();
-    private List<Uri> listPlayer = new ArrayList<Uri>();
+    private List<Media> listPlayer = new ArrayList<Media>();
     private int musica = 0;
     private boolean serviceStarted = false;
     private boolean servicePausado = false;
+    private boolean backgrounded;
 
     public void onCreate() {
         Log.i("SCRIPT", "onCreate()");
@@ -67,8 +68,8 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
     public void iniciarPlayer() {
         if (!mediaPlayer.isPlaying()) {
             try {
-                Uri uri = listPlayer.get(musica);
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), uri);
+                Media uri = listPlayer.get(musica);
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), uri.uri);
                 mediaPlayer.start();
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
@@ -153,7 +154,7 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
             musica++;
             try {
                 mediaPlayer.reset();
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), listPlayer.get(musica));
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), listPlayer.get(musica).uri);
                 mediaPlayer.start();
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
@@ -170,7 +171,7 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
         if (!mediaPlayer.isPlaying()) {
             musica--;
             try {
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), listPlayer.get(musica));
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), listPlayer.get(musica).uri);
                 mediaPlayer.start();
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
@@ -181,7 +182,7 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
     }
 
 
-    public List<Uri> obterAudioCelular() {
+    public List<Media> obterAudioCelular() {
         String[] projection = new String[]{MediaStore.Audio.Media._ID};
 
         Uri contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
@@ -191,8 +192,14 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
 
         while (cursor.moveToNext()) {
             String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
+            String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
+            //String provider = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.));
             Long idMusica = Long.parseLong(id);
-            listPlayer.add(getURI(idMusica));
+            Uri uri = getURI(idMusica);
+            String typeS =cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.CONTENT_TYPE));
+            int type = Integer.parseInt(typeS);
+
+            listPlayer.add(new Media(name,uri,type));
         }
         cursor.close();
 
@@ -221,5 +228,16 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
     @Override
     public int getIdentificadorMusica() {
         return musica;
+    }
+
+    public boolean getBackgrounded() {
+        return backgrounded;
+    }
+
+    public void setBackgrounded(boolean backgrounded) {
+        if (this.backgrounded == backgrounded) {
+            return;
+        }
+        this.backgrounded = backgrounded;
     }
 }

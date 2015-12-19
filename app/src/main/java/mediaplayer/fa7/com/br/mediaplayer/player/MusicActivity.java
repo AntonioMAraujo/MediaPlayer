@@ -1,4 +1,4 @@
-package mediaplayer.fa7.com.br.mediaplayer;
+package mediaplayer.fa7.com.br.mediaplayer.player;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -10,6 +10,10 @@ import android.os.IBinder;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import mediaplayer.fa7.com.br.mediaplayer.Funcionalidade;
+import mediaplayer.fa7.com.br.mediaplayer.MyServicePlay;
+import mediaplayer.fa7.com.br.mediaplayer.R;
 
 public class MusicActivity extends Activity implements ServiceConnection {
 
@@ -60,7 +64,7 @@ public class MusicActivity extends Activity implements ServiceConnection {
             @Override
             public void onClick(View view) {
                 anterior();
-                ;
+
             }
         });
 
