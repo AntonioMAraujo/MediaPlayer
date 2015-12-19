@@ -12,17 +12,14 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".player.MediaListActivity"
-            android:label="@string/title_activity_media_list" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".player.MusicPlayerActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".player.MusicActivity"
@@ -31,6 +28,10 @@
 
         <service android:name=".MyServicePlay" />
 
+        <activity
+            android:name=".player.MediaListActivity"
+            android:label="@string/title_activity_media_list" >
+        </activity>
     </application>
 
 </manifest>
