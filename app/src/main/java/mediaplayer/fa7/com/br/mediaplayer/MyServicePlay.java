@@ -24,8 +24,8 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
         MediaPlayer.OnBufferingUpdateListener,Funcionalidade{
 
     private MediaPlayer mediaPlayer = new MediaPlayer();
-    private Controller controle = new Controller();
     private List<Media> listPlayer = new ArrayList<Media>();
+    private final IBinder serviceBinder= new ServiceBinder();
     private int musica = 0;
     private boolean serviceStarted = false;
     private boolean servicePausado = false;
@@ -36,41 +36,19 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
         serviceStarted = true;
         listPlayer = getListMusic();
         musica = 0;
-        mediaPlayer.setOnCompletionListener(this);
-        mediaPlayer.setOnErrorListener(this);
-        mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnBufferingUpdateListener(this);
-        mediaPlayer.setOnSeekCompleteListener(this);
-        mediaPlayer.setOnInfoListener(this);
-        mediaPlayer.reset();
-    }
-
-    public class Controller extends Binder {
-        public Funcionalidade getMediaPlayer() {
-            return MyServicePlay.this;
-        }
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return controle;
-    }
-
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("SCRIPT", "onStartCommand");
-        mediaPlayer.reset();
         iniciarPlayer();
-        return (super.onStartCommand(intent, flags, startId));
     }
 
     public void iniciarPlayer() {
         if (!mediaPlayer.isPlaying()) {
             try {
-                Media uri = listPlayer.get(musica);
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), uri.uri);
-                mediaPlayer.start();
+                mediaPlayer.setOnCompletionListener(this);
+                mediaPlayer.setOnErrorListener(this);
+                mediaPlayer.setOnPreparedListener(this);
+                mediaPlayer.setOnBufferingUpdateListener(this);
+                mediaPlayer.setOnSeekCompleteListener(this);
+                mediaPlayer.setOnInfoListener(this);
+
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
             } catch (IllegalStateException e) {
@@ -79,6 +57,28 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
         }
     }
 
+    //pass song list
+    public void setList(List<Media> medias){
+        listPlayer=medias;
+    }
+
+
+    public class ServiceBinder extends Binder {
+        public MyServicePlay getMediaPlayer() {
+            return MyServicePlay.this;
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return serviceBinder;
+    }
+
+    public boolean onUnbind(Intent intent){
+        mediaPlayer.stop();
+        mediaPlayer.release();
+        return false;
+    }
 
     @Override
     public void onDestroy() {
@@ -141,6 +141,11 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
         }
     }
 
+    @Override
+    public List<Media> getListMusic() {
+        return null;
+    }
+
     public void stopMedia() {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
@@ -181,35 +186,6 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
         }
     }
 
-
-    public List<Media> getListMusic() {
-        String[] projection = new String[]{
-                MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.DISPLAY_NAME,
-                MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.DATA};
-
-        Uri contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-
-        Cursor cursor = getContentResolver().query(contentUri, projection, null, null, null);
-
-        listPlayer = new ArrayList<>();
-
-        while (cursor.moveToNext()) {
-            String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
-            String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
-            //String provider = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.));
-            Long idMusica = Long.parseLong(id);
-            Uri uri = getURI(idMusica);
-
-            listPlayer.add(new Media(idMusica,name,uri));
-        }
-        cursor.close();
-
-        return listPlayer;
-    }
-
-
     public Uri getURI(Long id) {
         return ContentUris.withAppendedId(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
     }
@@ -233,14 +209,10 @@ public class MyServicePlay extends Service implements MediaPlayer.OnCompletionLi
         return musica;
     }
 
-    public boolean getBackgrounded() {
-        return backgrounded;
+    public class MusicBinder extends Binder {
+        MyServicePlay getService() {
+            return MyServicePlay.this;
+        }
     }
 
-    public void setBackgrounded(boolean backgrounded) {
-        if (this.backgrounded == backgrounded) {
-            return;
-        }
-        this.backgrounded = backgrounded;
-    }
 }

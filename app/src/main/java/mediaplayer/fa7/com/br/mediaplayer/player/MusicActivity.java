@@ -23,7 +23,7 @@ public class MusicActivity extends Activity implements ServiceConnection {
     private Button btnProximo;
     private Button btnAnterior;
     private Button btnParar;
-    private MyServicePlay.Controller controle;
+    private MyServicePlay controle;
     private Funcionalidade funcionalidades;
     private ServiceConnection connection;
 
@@ -159,8 +159,7 @@ public class MusicActivity extends Activity implements ServiceConnection {
 
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-        controle = (MyServicePlay.Controller) iBinder;
-        funcionalidades = controle.getMediaPlayer();
+        controle = (MyServicePlay) iBinder;
     }
 
     @Override
